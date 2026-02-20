@@ -62,6 +62,8 @@ export default function App() {
   const [appointments, setAppointments] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [prediction, setPrediction] = useState({});
+
 
   // dashboard
   const [summary, setSummary] = useState(null);
@@ -170,6 +172,34 @@ export default function App() {
       setLoading(false);
     }
   }
+
+  function NoShowBadge({ value }) {
+  const color =
+    value >= 60 ? "#721c24" :
+    value >= 40 ? "#856404" :
+    "#155724";
+
+  const bg =
+    value >= 60 ? "#f8d7da" :
+    value >= 40 ? "#fff3cd" :
+    "#d4edda";
+
+  return (
+    <span
+      style={{
+        background: bg,
+        color,
+        padding: "4px 8px",
+        borderRadius: 8,
+        fontSize: 12,
+        fontWeight: 600,
+      }}
+    >
+      No-show {value}%
+    </span>
+  );
+}
+
 
   function MiniBars({ data }) {
   const max = Math.max(1, ...data.map((d) => d.total || 0));
@@ -348,6 +378,28 @@ export default function App() {
                       >
                         Cancel
                       </button>
+
+                      <button
+                          disabled={loading}
+                          onClick={async () => {
+                            try {
+                              const res = await api.getNoShowPrediction(a.id);
+                              setPrediction((p) => ({
+                                ...p,
+                                [a.id]: res.no_show_probability,
+                              }));
+                            } catch (e) {
+                              setError(e?.message || "Prediction error");
+                            }
+                          }}
+                        >
+                          Predict
+                        </button>
+
+                        {prediction[a.id] != null && (
+                          <NoShowBadge value={prediction[a.id]} />
+                        )}
+
                     </td>
                   </tr>
                 ))}

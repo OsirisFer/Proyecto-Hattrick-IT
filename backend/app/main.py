@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 
 from app.db import Base, engine
-from app.routers import patients, appointments, analytics
+from app.routers import patients, appointments, analytics, predict
 
 # 1) Creamos la app
 app = FastAPI(
@@ -33,3 +33,4 @@ app.add_middleware(
 
 app.include_router(analytics.router)
 
+app.include_router(predict.router)

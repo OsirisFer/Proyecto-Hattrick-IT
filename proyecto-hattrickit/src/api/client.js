@@ -40,4 +40,8 @@ export const api = {
   getAnalyticsByDay: (days = 14) =>
     request(`/analytics/by-day?days=${days}`),
 
+  // prediction
+getNoShowPrediction: (appointmentId) =>
+  request(`/predict/no-show/${appointmentId}`),
+
 };
