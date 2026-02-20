@@ -1,5 +1,9 @@
 from datetime import datetime
-from pydantic import BaseModel
+from typing import Literal
+from pydantic import BaseModel, ConfigDict
+
+
+AppointmentStatus = Literal["scheduled", "checked_in", "completed", "cancelled"]
 
 
 class PatientCreate(BaseModel):
@@ -7,24 +11,27 @@ class PatientCreate(BaseModel):
 
 
 class PatientOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: int
     name: str
 
 
 # -------- Appointments --------
 
-# Lo que el cliente manda para crear un turno
 class AppointmentCreate(BaseModel):
     patient_id: int
-    scheduled_at: datetime  # ISO string: "2026-02-18T15:00:00"
+    scheduled_at: datetime
 
 
-# Lo que la API devuelve
 class AppointmentOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: int
     patient_id: int
     scheduled_at: datetime
-    status: str
+    status: AppointmentStatus
+
 
 class AppointmentStatusUpdate(BaseModel):
-    status: str  # "checked_in" | "completed" | "cancelled"
+    status: AppointmentStatus

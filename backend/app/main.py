@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 
 from app.db import Base, engine
-from app.routers import patients, appointments
+from app.routers import patients, appointments, analytics
 
 # 1) Creamos la app
 app = FastAPI(
@@ -20,3 +20,16 @@ def health_check():
 # 4) Registramos los routers
 app.include_router(patients.router)
 app.include_router(appointments.router)
+
+from fastapi.middleware.cors import CORSMiddleware
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+app.include_router(analytics.router)
+

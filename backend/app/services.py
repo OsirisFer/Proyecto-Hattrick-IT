@@ -27,9 +27,6 @@ def create_appointment(db: Session, patient_id: int, scheduled_at: datetime):
 
 
 def update_appointment_status(db: Session, appointment_id: int, new_status: str):
-    if new_status not in APPOINTMENT_STATUSES:
-        raise InvalidStateTransition("unknown", new_status)
-
     appt = repositories.get_appointment_by_id(db, appointment_id)
     if not appt:
         raise NotFound("Appointment", appointment_id)
@@ -39,7 +36,7 @@ def update_appointment_status(db: Session, appointment_id: int, new_status: str)
         raise InvalidStateTransition(current, new_status)
 
     appt.status = new_status
-    db.add(appt)
     db.commit()
     db.refresh(appt)
     return appt
+
