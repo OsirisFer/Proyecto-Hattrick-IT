@@ -6,6 +6,55 @@ function formatLocal(dtIso) {
   return dtIso.replace("T", " ").slice(0, 16);
 }
 
+const STATUS_STYLES = {
+  scheduled: {
+    label: "Scheduled",
+    bg: "#fff3cd",
+    color: "#856404",
+  },
+  checked_in: {
+    label: "Checked-in",
+    bg: "#cce5ff",
+    color: "#004085",
+  },
+  completed: {
+    label: "Completed",
+    bg: "#d4edda",
+    color: "#155724",
+  },
+  cancelled: {
+    label: "Cancelled",
+    bg: "#f8d7da",
+    color: "#721c24",
+  },
+};
+
+function StatusBadge({ status }) {
+  const s = STATUS_STYLES[status] || {
+    label: status,
+    bg: "#eee",
+    color: "#333",
+  };
+
+  return (
+    <span
+      style={{
+        background: s.bg,
+        color: s.color,
+        padding: "4px 10px",
+        borderRadius: 999,
+        fontSize: 12,
+        fontWeight: 600,
+        whiteSpace: "nowrap",
+      }}
+    >
+      {s.label}
+    </span>
+  );
+}
+
+
+
 export default function App() {
   const [tab, setTab] = useState("appointments"); // "appointments" | "patients" | "dashboard"
 
@@ -122,6 +171,49 @@ export default function App() {
     }
   }
 
+  function MiniBars({ data }) {
+  const max = Math.max(1, ...data.map((d) => d.total || 0));
+
+  return (
+    <div
+      style={{
+        display: "flex",
+        alignItems: "flex-end",
+        gap: 6,
+        height: 70,
+        padding: "10px 8px",
+        border: "1px solid #eee",
+        borderRadius: 12,
+        background: "#fafafa",
+        overflowX: "auto",
+      }}
+      title="Total appointments per day"
+    >
+      {data.map((d) => {
+        const h = Math.round(((d.total || 0) / max) * 60); // 0..60 px
+        return (
+          <div key={d.day} style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+            <div
+              title={`${d.day} • total: ${d.total}`}
+              style={{
+                width: 12,
+                height: Math.max(2, h),
+                borderRadius: 6,
+                background: "#111",
+                opacity: 0.85,
+              }}
+            />
+            <div style={{ fontSize: 10, opacity: 0.6, marginTop: 4 }}>
+              {d.day.slice(5)} {/* MM-DD */}
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+
   return (
     <div style={{ maxWidth: 980, margin: "0 auto", padding: 20, fontFamily: "system-ui" }}>
       <h1 style={{ marginBottom: 6 }}>Clinic Queue</h1>
@@ -232,9 +324,9 @@ export default function App() {
                       #{a.patient_id} — {patientById.get(a.patient_id)?.name ?? "Unknown"}
                     </td>
                     <td>{formatLocal(a.scheduled_at)}</td>
-                    <td>
-                      <b>{a.status}</b>
-                    </td>
+                      <td>
+                        <StatusBadge status={a.status} />
+                      </td>
                     <td style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
                       <button
                         disabled={loading || a.status !== "scheduled"}
@@ -329,6 +421,12 @@ export default function App() {
 
           <section style={{ padding: 12, border: "1px solid #ddd", borderRadius: 12 }}>
             <h3 style={{ marginTop: 0 }}>Appointments by day</h3>
+              {byDay.length > 0 && (
+                <div style={{ marginBottom: 12 }}>
+                  <MiniBars data={byDay} />
+                </div>
+              )}
+
 
             <table width="100%" cellPadding={8} style={{ borderCollapse: "collapse" }}>
               <thead>
